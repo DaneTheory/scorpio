@@ -8,4 +8,4 @@
     3. Locations mentioned
     4. Dates mentioned
     5. Summary of intent and content
-3. Organizes data into helpful reminders
+3. Organizes data into a helpful format

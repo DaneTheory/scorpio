@@ -26,8 +26,6 @@ User:
     triggers
     
 #### Routes:
-
-With Phone:
 1. get/register - registers a user to the app
 2. post/register
 3. get/login - logs in and renders the home page that has a list of your stored contacts

@@ -1,4 +1,4 @@
-# SCORPIO
+# scorpio
 ### Transcribing Phone Calls To Set Reminders
 
 1. Twilio transactions save audio recordings of phone conversations

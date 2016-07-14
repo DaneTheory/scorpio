@@ -26,10 +26,12 @@ User:
     triggers
     
 #### Routes:
+
 With Phone:
-    get/register
-    get/login
-    get/convo
-    post/contact
-    post/trigger
-    
+1. get/register - registers a user to the app
+2. post/register
+3. get/login - logs in and renders the home page that has a list of your stored contacts
+4. post/login
+5. post/call - makes a request to twilio, twilio handles the call and records an audio file. We then make a request to an audio to text api. Then run that text through a text analyzer. Add results to the data model.
+6. get/convo - grabs the conversation text sorted by date.
+7. post/trigger - adding new trigger words or phrases to the data model.

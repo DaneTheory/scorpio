@@ -4,13 +4,14 @@
 1. Twilio transactions save audio recordings of phone conversations
 2. Use speech to text analyzer api (Google or Siri or popup archive)
 3. wit.ai or indico parses those audio files to highlight the following:
-    1. People you talked to
-    2. Numbers mentioned
-    3. Locations mentioned
-    4. Dates mentioned
-    5. Summary of intent and content
-    6. Possibly people mentioned but it's less important
+    1. Numbers mentioned 
+    2. Locations mentioned
+    3. Dates mentioned
+    4. Summary of intent and content
+    5. Possibly people mentioned but it's less important
 4. Organizes data into a helpful format
+5. Adds trigger commands that user customizes
+- if the trigger words are detected, either add commands directly to calendar/external location or show user words surrounding those trigger words
 
 
 ### Routes and Models

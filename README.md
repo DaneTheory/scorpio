@@ -31,7 +31,6 @@ User:
 3. get/login - logs in and renders the home page that has a list of your stored contacts
 4. post/login
 5. post/call - makes a request to twilio, twilio handles the call and records an audio file. We then make a request to an audio to text api. Then run that text through a text analyzer. Add results to the data model.
-5.1 making twilio request: 
     - give the user a new twilio number
     - set the bin number (within TWiML code) to the person they are calling (the contact's number)
     - add a recording command within the TWiML code

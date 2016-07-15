@@ -11,7 +11,7 @@
     5. Possibly people mentioned but it's less important
 4. Organizes data into a helpful format
 5. Adds trigger commands that user customizes
-- if the trigger words are detected, either add commands directly to calendar/external location or show user words surrounding those trigger words
+    1. if the trigger words are detected, either add commands directly to calendar/external location or show user words surrounding those trigger words
 
 
 ### Routes and Models

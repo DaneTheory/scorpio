@@ -36,6 +36,10 @@ router.post('/transcribe', (req, res, next) => {
 	console.log(req.body);
 	res.send('good');
 })
-
+// <Response>
+// <Dial timeout="10" record="true">914-523-5432</Dial>
+// <Conference record='record-from-start'>  <Record transcribe="true" transcribeCallback="https://c01bfffd.ngrok.io/transcribe/"></Record> </Conference>
+// </Response>
+ //method='POST' action='https://0f8daa0e.ngrok.io/transcribe/'
 
 module.exports = router;

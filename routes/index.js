@@ -2,11 +2,28 @@ var express = require('express');
 var router = express.Router();
 var client = require('twilio')('AC0267f6ffaee6267f387f6681654ba52b', 'b7fd16fb34b78199b1c283702973553c');
 var request = require('request');
+var passport = require('passport');
 // var WebSocket = require('websocket').w3cwebsocket;
 var websocket = require('websocket-stream');
 var wsURI = "wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize?watson-token=";
 var indico = require('indico.io');
 indico.apiKey =  '98ec712b78bba76fbc655865c9e74cbe';
+
+var googleCredentials = require('client_secret.json');
+
+var GoogleStrategy = require('passport-google-oauth2').Strategy;
+passport.use(new GoogleStrategy({
+    clientID: googleCredentials.installed.client_id,
+    clientSecret: googleCredentials.installed.client_secret,
+    callbackURL: "https://scorpio-backend.herokuapp.com/auth/google/callback",
+    passReqToCallback: true
+  },
+  function(request, accessToken, refreshToken, profile, done) {
+    User.findOrCreate({ googleId: profile.id }, function (err, user) {
+      return done(err, user);
+    });
+  }
+));
 
 // var response = function(res) { console.log(res); }
 var logError = function(err) { console.log(err); }
@@ -291,6 +308,74 @@ router.post('/transcribe', (req, res, next) => {
 	res.send('good');
 })
 
+
+
+
+
+
+// ALL OF THE AUTHENTICATION AND LOGIN SHIT!!!!!!
+
+router.get('/login/failure', function(req, res) {
+	res.status(401).json({
+	  success: false
+	});
+});
+
+router.post('/login', passport.authenticate('local', {
+	successRedirect: '/login/success',
+	failureRedirect: '/login/failure'
+}));
+
+// router.post('/register', function(req, res, next) {
+// 	var params = _.pick(req.body, ['username', 'password']);
+// 	bcrypt.genSalt(10, function(err, salt) {
+// 	  bcrypt.hash(params.password, salt, function(err, hash) {
+// 	    // Store hash in your password DB.
+// 	    params.password = hash;
+// 	    models.User.create(params, function(err, user) {
+// 	      if (err) {
+// 	        res.status(400).json({
+// 	          success: false,
+// 	          error: err.message
+// 	        });
+// 	      } else {
+// 	        res.json({
+// 	          success: true,
+// 	          user: user
+// 	        });
+// 	      }
+// 	    });
+// 	  });
+// 	});
+// });
+
+// Beyond this point the user must be logged in
+router.use(function(req, res, next) {
+	if (!req.isAuthenticated()) {
+	  res.status(401).json({
+	    success: false,
+	    error: 'not authenticated'
+	  });
+	} else {
+	  next();
+	}
+});
+
+router.get('/logout', function(req, res) {
+	req.logout();
+	res.json({
+	  success: true,
+	  message: 'logged out.'
+	});
+});
+
+router.get('/login/success', function(req, res) {
+	var user = _.pick(req.user, 'username', '_id');
+	res.json({
+	  success: true,
+	  user: user
+	});
+});
 
 
 // <Response>

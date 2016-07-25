@@ -5,7 +5,7 @@ var googleAuth = require('google-auth-library');
 
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/calendar-nodejs-quickstart.json
-var SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
+var SCOPES = ['https://www.googleapis.com/auth/calendar'];
 var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
     process.env.USERPROFILE) + '/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'calendar-nodejs-quickstart.json';
@@ -18,7 +18,7 @@ fs.readFile('client_secret.json', function processClientSecrets(err, content) {
   }
   // Authorize a client with the loaded credentials, then call the
   // Google Calendar API.
-  authorize(JSON.parse(content), listEvents);
+  authorize(JSON.parse(content), addEvent);
 });
 
 /**
@@ -127,3 +127,25 @@ function listEvents(auth) {
     }
   });
 }
+
+function addEvent(auth) {
+  var resource = {
+    "summary": "Lunch and shit",
+    "location": "Philadelphia, Pennsylvania",
+    "start": {
+      "dateTime": "2016-07-25T10:00:00.000-07:00"
+    },
+    "end": {
+      "dateTime": "2016-07-25T10:25:00.000-07:00"
+    }
+  };
+  var calendar = google.calendar('v3');
+
+  var request = calendar.events.insert({
+    auth: auth,
+    calendarId: 'primary',
+    resource: resource
+  });
+}
+
+

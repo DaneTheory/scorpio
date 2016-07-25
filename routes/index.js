@@ -291,6 +291,9 @@ router.post('/transcribe', (req, res, next) => {
 	res.send('good');
 })
 
+router.post('/googlecalendar', (req,res,next)=>{
+	
+})
 
 
 // <Response>

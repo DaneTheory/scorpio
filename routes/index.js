@@ -77,7 +77,12 @@ function onMessage(evt, recordingUrl) {
 			}
 		}
 		console.log("Chat", chat);
-		// indico.analyzeText(['Donald Trump is not a good person', 'Republicans are evil and the wealthy should be heavily taxed', 'Democrats are evil and there should be no income taxes'], {apis: ['sentiment_hq', 'people', 'places']}).then((res) => {console.log(res.people)}).catch(logError);
+		const client = new Wit({accessToken: 'XWGLY6YPJZWVXDFKG6OHPO7KNSZ76JNT'});
+			client.message('Lets meet up tomorrow from seven until nine', {})
+			.then((data) => {
+			  console.log('Yay, got Wit.ai response: ' + JSON.stringify(data));
+			})
+			.catch(console.error);
 		indico.analyzeText(Person1, {apis: ['sentiment_hq', 'places', 'people', 'emotion', 'twitterEngagement']})
 			.then((res) => {
 				var sumSent = 0;

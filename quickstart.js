@@ -130,13 +130,13 @@ function listEvents(auth) {
 
 function addEvent(auth) {
   var resource = {
-    "summary": "Lunch and shit",
-    "location": "Philadelphia, Pennsylvania",
+    "summary": "Weird dog stuff with Tyler",
+    "location": "Detroit, Michigan",
     "start": {
-      "dateTime": "2016-07-25T10:00:00.000-07:00"
+      "dateTime": "2016-07-27T10:00:00.000-07:00"
     },
     "end": {
-      "dateTime": "2016-07-25T10:25:00.000-07:00"
+      "dateTime": "2016-07-27T10:25:00.000-07:00"
     }
   };
   var calendar = google.calendar('v3');

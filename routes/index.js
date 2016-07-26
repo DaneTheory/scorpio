@@ -43,7 +43,7 @@ router.post('/call', function(req, res, next) {
 	client.makeCall({
 		to: req.body.from,
 		from: '+12155154014',
-		url: 'https://b708783f.ngrok.io/call?to='+req.body.to,
+		url: 'https://scorpio-backend.herokuapp.com/call?to='+req.body.to,
 		method: 'GET'
 	}, function(err, responseData) {
 		console.log("RESPONSE DATA:", responseData);
@@ -53,7 +53,7 @@ router.post('/call', function(req, res, next) {
 router.get('/call', (req, res, next) => {
 	// data: {
 	// 	url: 'https://657a1c9b.ngrok.io/call'
-	var link="<?xml version=\'1.0\' encoding=\'UTF-8\'?><Response><Say>Connecting you to your caller</Say><Dial timeout=\'10\' record=\'true\' action=\'https://b708783f.ngrok.io/calls/receive\'>" + req.query.to + "</Dial></Response>";
+	var link="<?xml version=\'1.0\' encoding=\'UTF-8\'?><Response><Say>Connecting you to your caller</Say><Dial timeout=\'10\' record=\'true\' action=\'https://scorpio-backend.herokuapp.com/calls/receive\'>" + req.query.to + "</Dial></Response>";
 	// console.log("LINK:", link);
 	res.set('Content-Type', 'text/xml')
 	res.send(link)
@@ -95,7 +95,13 @@ function onMessage(evt, recordingUrl) {
 			}
 		}
 		console.log("Chat", chat);
-		// indico.analyzeText(['Donald Trump is not a good person', 'Republicans are evil and the wealthy should be heavily taxed', 'Democrats are evil and there should be no income taxes'], {apis: ['sentiment_hq', 'people', 'places']}).then((res) => {console.log(res.people)}).catch(logError);
+		
+		const client = new Wit({accessToken: 'XWGLY6YPJZWVXDFKG6OHPO7KNSZ76JNT'});
+			client.message('Lets meet up tomorrow from seven until nine', {})
+			.then((data) => {
+			  console.log('Yay, got Wit.ai response: ' + JSON.stringify(data));
+			})
+			.catch(console.error);
 		indico.analyzeText(Person1, {apis: ['sentiment_hq', 'places', 'people', 'emotion', 'twitterEngagement']})
 			.then((res) => {
 				var sumSent = 0;

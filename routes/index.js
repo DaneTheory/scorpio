@@ -25,7 +25,7 @@ router.post('/call', function(req, res, next) {
 	client.makeCall({
 		to: req.body.from,
 		from: '+12155154014',
-		url: 'https://b708783f.ngrok.io/call?to='+req.body.to,
+		url: 'https://scorpio-backend.herokuapp.com/call?to='+req.body.to,
 		method: 'GET'
 	}, function(err, responseData) {
 		console.log("RESPONSE DATA:", responseData);
@@ -35,7 +35,7 @@ router.post('/call', function(req, res, next) {
 router.get('/call', (req, res, next) => {
 	// data: {
 	// 	url: 'https://657a1c9b.ngrok.io/call'
-	var link="<?xml version=\'1.0\' encoding=\'UTF-8\'?><Response><Say>Connecting you to your caller</Say><Dial timeout=\'10\' record=\'true\' action=\'https://b708783f.ngrok.io/calls/receive\'>" + req.query.to + "</Dial></Response>";
+	var link="<?xml version=\'1.0\' encoding=\'UTF-8\'?><Response><Say>Connecting you to your caller</Say><Dial timeout=\'10\' record=\'true\' action=\'https://scorpio-backend.herokuapp.com/calls/receive\'>" + req.query.to + "</Dial></Response>";
 	// console.log("LINK:", link);
 	res.set('Content-Type', 'text/xml')
 	res.send(link)
@@ -77,6 +77,7 @@ function onMessage(evt, recordingUrl) {
 			}
 		}
 		console.log("Chat", chat);
+		
 		const client = new Wit({accessToken: 'XWGLY6YPJZWVXDFKG6OHPO7KNSZ76JNT'});
 			client.message('Lets meet up tomorrow from seven until nine', {})
 			.then((data) => {

@@ -4,9 +4,9 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var routes = require('./routes/index');
-var users = require('./routes/users');
-var models = require('./models/models')
+var session = require('express-session');
+var mongoose = require('mongoose');
+
 
 var app = express();
 
@@ -19,11 +19,50 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(session({
+  secret: 'fairyPrincess123'
+}))
+
+mongoose.connect(require('./models/connect'));
+
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
+
+var auth = require('./routes/auth');
+var routes = require('./routes/index');
+var models = require('./models/models');
+
+app.use(passport.initialize())
+app.use(passport.session())
+
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  models.User.findById(id, function(err, user) {
+    done(err, user);
+  });
+});
+
+passport.use(new LocalStrategy(
+  function(username, password, done) {
+    models.User.findOne({ username: username }, function (err, user) {
+      if (err) { return done(err); }
+      if (!user) {
+        return done(null, false, { message: 'Incorrect username.' });
+      }
+      if (!user.validPassword(password)) {
+        return done(null, false, { message: 'Incorrect password.' });
+      }
+      return done(null, user);
+    });
+  }
+));
+app.use('/', auth(passport));
 app.use('/', routes);
-app.use('/users', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

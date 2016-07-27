@@ -21,4 +21,20 @@ router.get('/conversations', function (req, res) {
 	})
 });
 
+router.get('/content/:id', function (req, res) {
+	models.Conversation.findById(req.params.id, function(err, content) {
+		if (err) {
+			res.status(400).json({
+				success: false,
+				error: err.message
+			});
+		} else {
+			res.json({
+				success: true,
+				content
+			});
+		}
+	});
+});
+
 module.exports = router;

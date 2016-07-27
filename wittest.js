@@ -7,3 +7,4 @@
 //   console.log('Yay, got Wit.ai response: ' + JSON.stringify(data));
 // })
 // .catch(console.error);
+  // "node-wit": "^4.0.0",

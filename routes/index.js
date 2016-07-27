@@ -9,6 +9,7 @@ var websocket = require('websocket-stream');
 var wsURI = "wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize?watson-token=";
 var indico = require('indico.io');
 indico.apiKey =  '98ec712b78bba76fbc655865c9e74cbe';
+var Wit = require('node-wit').Wit;
 
 // var googleCredentials = require('client_secret.json');
 // var GoogleStrategy = require('passport-google-oauth2').Strategy;
@@ -43,9 +44,10 @@ router.post('/call', function(req, res, next) {
 	client.makeCall({
 		to: req.body.from,
 		from: '+12155154014',
-		url: 'https://scorpio-backend.herokuapp.com/call?to='+req.body.to,
+		url: 'https://1036f5d4.ngrok.io/call?to='+req.body.to,
 		method: 'GET'
 	}, function(err, responseData) {
+		console.log("this is the fucking error",err)
 		console.log("RESPONSE DATA:", responseData);
 	});
 })
@@ -53,7 +55,7 @@ router.post('/call', function(req, res, next) {
 router.get('/call', (req, res, next) => {
 	// data: {
 	// 	url: 'https://657a1c9b.ngrok.io/call'
-	var link="<?xml version=\'1.0\' encoding=\'UTF-8\'?><Response><Say>Connecting you to your caller</Say><Dial timeout=\'10\' record=\'true\' action=\'https://scorpio-backend.herokuapp.com/calls/receive\'>" + req.query.to + "</Dial></Response>";
+	var link="<?xml version=\'1.0\' encoding=\'UTF-8\'?><Response><Say>Connecting you to your caller</Say><Dial timeout=\'10\' record=\'true\' action=\'https://1036f5d4.ngrok.io/calls/receive\'>" + req.query.to + "</Dial></Response>";
 	// console.log("LINK:", link);
 	res.set('Content-Type', 'text/xml')
 	res.send(link)
@@ -97,7 +99,7 @@ function onMessage(evt, recordingUrl) {
 		console.log("Chat", chat);
 		
 		const client = new Wit({accessToken: 'XWGLY6YPJZWVXDFKG6OHPO7KNSZ76JNT'});
-			client.message('Lets meet up tomorrow from seven until nine', {})
+			client.message(Person1[0], {})
 			.then((data) => {
 			  console.log('Yay, got Wit.ai response: ' + JSON.stringify(data));
 			})

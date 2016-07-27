@@ -10,6 +10,7 @@ var wsURI = "wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize?wat
 var indico = require('indico.io');
 indico.apiKey =  '98ec712b78bba76fbc655865c9e74cbe';
 var Wit = require('node-wit').Wit;
+var models = require('../models/models');
 
 // var googleCredentials = require('client_secret.json');
 // var GoogleStrategy = require('passport-google-oauth2').Strategy;
@@ -102,6 +103,17 @@ function onMessage(evt, recordingUrl) {
 			client.message(Person1[0], {})
 			.then((data) => {
 			  console.log('Yay, got Wit.ai response: ' + JSON.stringify(data));
+			  var convo = new models.Conversation({
+			  	transcription:chat,
+			  	calendar: [{
+			  		startDate: 'now',
+			  		endDate: 'end',
+			  		}]
+			  }).save(function(err, conversation){
+			  	if(err){
+			  		console.log("convo error",err)
+			  	}
+			  });
 			})
 			.catch(console.error);
 		indico.analyzeText(Person1, {apis: ['sentiment_hq', 'places', 'people', 'emotion', 'twitterEngagement']})

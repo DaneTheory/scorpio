@@ -2,6 +2,7 @@ var router = require('express').Router();
 var _ = require('underscore');
 var bcrypt = require('bcrypt');
 var models = require('../models/models');
+var contacts = require('react-native-contacts');
 
 
 module.exports = function(passport) {

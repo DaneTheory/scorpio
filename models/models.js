@@ -20,6 +20,9 @@ var userSchema = mongoose.Schema({
 });
 
 var conversationSchema = mongoose.Schema({
+	contact: {
+		type: String
+	},
 	date: {
       type: String
     },
@@ -48,6 +51,6 @@ userSchema.methods.validPassword = function(pw) {
 userSchema.plugin(findOrCreate);
 
 module.exports = {
-	User: mongoose.model('User', userSchema)
+	User: mongoose.model('User', userSchema),
 	Conversation: mongoose.model('Conversation', conversationSchema)
 }

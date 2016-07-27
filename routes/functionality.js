@@ -4,7 +4,7 @@ var models = require('../models/models');
 var User = models.User;
 
 router.get('/conversations', function (req, res) {
-	models.Conersation.find({
+	models.Conversation.find({
 		user: req.query.id
 	}, function(err, convos) {
 		if (err) {
@@ -21,4 +21,4 @@ router.get('/conversations', function (req, res) {
 	})
 });
 
-return router;
+module.exports = router;

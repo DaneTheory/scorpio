@@ -24,30 +24,27 @@ var conversationSchema = mongoose.Schema({
     type: String
   },
   date: {
-      type: String
-    },
-    transcription: {
-      type: String
-    },
-    calendar:[
-      {description:String,
-      startDate:String,
-      endDate:String,
-      location:String}
-    ],
-    numbers: {
-      type: Array
-    },
-    locations: {
-      type: Array
-    },
-    triggerSurround: {
-      type: Array
-    },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    }
+    type: String
+  },
+  transcription: {
+    type: Array
+  },
+  calendar:{
+    type: Array
+  },
+  numbers: {
+    type: Array
+  },
+  locations: {
+    type: Array
+  },
+  triggerSurround: {
+    type: Array
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }
 })
 
 userSchema.methods.validPassword = function(pw) {

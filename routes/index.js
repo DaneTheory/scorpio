@@ -12,6 +12,9 @@ indico.apiKey =  '98ec712b78bba76fbc655865c9e74cbe';
 var Wit = require('node-wit').Wit;
 var models = require('../models/models');
 
+
+const witclient = new Wit({accessToken: 'XWGLY6YPJZWVXDFKG6OHPO7KNSZ76JNT'});
+
 // var googleCredentials = require('client_secret.json');
 // var GoogleStrategy = require('passport-google-oauth2').Strategy;
 
@@ -97,25 +100,52 @@ function onMessage(evt, recordingUrl) {
 				chat.push("Person2: " + evt.data["results"][i].alternatives[0].transcript)
 			}
 		}
+		var convo = new models.Conversation({
+				  	transcription:chat,
+				  	
+				  });
+		convo.save(function(err, conversation){
+				  	if(err){
+				  		console.log("convo error",err)
+				  	}
+				  });
 		console.log("Chat", chat);
-		
-		const client = new Wit({accessToken: 'XWGLY6YPJZWVXDFKG6OHPO7KNSZ76JNT'});
-			client.message(Person1[0], {})
-			.then((data) => {
-			  console.log('Yay, got Wit.ai response: ' + JSON.stringify(data));
-			  var convo = new models.Conversation({
-			  	transcription:chat,
-			  	calendar: [{
-			  		startDate: 'now',
-			  		endDate: 'end',
-			  		}]
-			  }).save(function(err, conversation){
-			  	if(err){
-			  		console.log("convo error",err)
-			  	}
-			  });
-			})
-			.catch(console.error);
+		for (var i = 0; i < chat.length; i++) {
+				console.log("this is fucking chat[i]", chat[i]);
+				var chatmessage = chat[i];
+				witclient.message(chat[i], {})
+				.then((data) => {
+				  console.log('Yay, got Wit.ai response: ' + JSON.stringify(data));
+				  //Yay, got Wit.ai response: {"msg_id":"9e300e0a-a11c-4160-ab30-ec80c38152b2",
+				  //"_text":"Hey I'd like to schedule a meeting with you from five to seven PM on Thursday ",
+				  //"entities":{"scorpio":[{"confidence":1,"type":"value","value":"meeting at"}],
+				  //"datetime":[{"confidence":0.9759197034399201,"type":"interval","from":{"value":"2005-01-01T00:00:00.000-08:00",
+				  //"grain":"hour"},"to":{"value":"2005-01-06T20:00:00.000-08:00","grain":"hour"},"values":[]}]}}
+				  var calendar = {description: null, startTime: null, endTime: null, location: null};
+				 console.log("this is chat [i]", chatmessage);
+				  for (var j = 0; j < data.entities.datetime.length; j++) {
+				  	if (data.entities.datetime[j].type === "interval") {
+				  		calendar.startTime = data.entities.datetime[j].from.value;
+				  		var end = new Date(data.entities.datetime[j].to.value);
+
+
+				  		calendar.endTime = end;
+
+				  		// if (data.entities.location) {
+				  		// 	calendar.location = data.entities.location;
+				  		// }
+				  		calendar.description = chatmessage;
+				  		convo.calendar.push(calendar)
+				  		convo.save(function(err, conversation) {
+				  			if (err) console.log("individual error", err);
+				  			console.log("saved convo:", conversation)
+				  		})
+				  	}
+				  }
+				 
+				})
+				.catch(console.error)
+		};
 		indico.analyzeText(Person1, {apis: ['sentiment_hq', 'places', 'people', 'emotion', 'twitterEngagement']})
 			.then((res) => {
 				var sumSent = 0;

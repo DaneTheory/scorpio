@@ -32,6 +32,7 @@ var LocalStrategy = require('passport-local').Strategy;
 
 var auth = require('./routes/auth');
 var routes = require('./routes/index');
+var functionality = require('./routes/functionality')
 var models = require('./models/models');
 
 app.use(passport.initialize())
@@ -63,6 +64,8 @@ passport.use(new LocalStrategy(
 ));
 app.use('/', routes);
 app.use('/', auth(passport));
+app.use('/', functionality);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

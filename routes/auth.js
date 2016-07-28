@@ -3,7 +3,6 @@ var _ = require('underscore');
 var bcrypt = require('bcrypt');
 var models = require('../models/models');
 
-
 module.exports = function(passport) {
 
 	router.get('/login/failure', function(req, res) {

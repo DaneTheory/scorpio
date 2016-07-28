@@ -10,6 +10,8 @@ var wsURI = "wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize?wat
 var indico = require('indico.io');
 indico.apiKey =  '98ec712b78bba76fbc655865c9e74cbe';
 var Wit = require('node-wit').Wit;
+var phone = require('node-phonenumber')
+var phoneUtil = phone.PhoneNumberUtil.getInstance();
 
 // var googleCredentials = require('client_secret.json');
 // var GoogleStrategy = require('passport-google-oauth2').Strategy;
@@ -39,10 +41,13 @@ router.get('/', function(req, res, next) {
 // - records call, transcribes it, analyzes it, and updates model accordingly
 router.post('/call', function(req, res, next) {
 	// create caller id for user making call/verify their phone number with twilio --DO THIS LATER
+	var phoneNumber = phoneUtil.parse(req.body.from,'US');
+	var toNumber = phoneUtil.format(phoneNumber, phone.PhoneNumberFormat.INTERNATIONAL);
+	var to = toNumber.replace(/[ ]/g, '').replace(/[-]/g, '');
 
 	// make a call request to Twilio, using the from number as the number verified in the previous route
 	client.makeCall({
-		to: req.body.from,
+		to: to,
 		from: '+12155154014',
 		url: 'https://1036f5d4.ngrok.io/call?to='+req.body.to,
 		method: 'GET'

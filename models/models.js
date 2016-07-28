@@ -13,8 +13,17 @@ var userSchema = mongoose.Schema({
   triggers: { // these are words set by the user that they use in conversation
     type: Array
   },
-  conversations: { // this may need a separate model, because there will be multiple conversations
-    date: {
+  conversations: [{
+  	type: mongoose.Schema.Types.ObjectId,
+  	ref: 'Conversation'
+  }]
+});
+
+var conversationSchema = mongoose.Schema({
+	contact: {
+		type: String
+	},
+	date: {
       type: String
     },
     transcription: {
@@ -28,17 +37,20 @@ var userSchema = mongoose.Schema({
     },
     triggerSurround: {
       type: Array
+    },
+    user: {
+    	type: mongoose.Schema.Types.ObjectId,
+	  	ref: 'User'
     }
-  }
-});
+})
 
 userSchema.methods.validPassword = function(pw) {
 	return bcrypt.compareSync(pw, this.password);
 }
 
-
 userSchema.plugin(findOrCreate);
 
 module.exports = {
-	User: mongoose.model('User', userSchema)
+	User: mongoose.model('User', userSchema),
+	Conversation: mongoose.model('Conversation', conversationSchema)
 }

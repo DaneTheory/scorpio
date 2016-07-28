@@ -12,22 +12,11 @@ indico.apiKey =  '98ec712b78bba76fbc655865c9e74cbe';
 var Wit = require('node-wit').Wit;
 var phone = require('node-phonenumber')
 var phoneUtil = phone.PhoneNumberUtil.getInstance();
+var models = require('../models/models');
 
-// var googleCredentials = require('client_secret.json');
-// var GoogleStrategy = require('passport-google-oauth2').Strategy;
 
-// passport.use(new GoogleStrategy({
-//     clientID: googleCredentials.installed.client_id,
-//     clientSecret: googleCredentials.installed.client_secret,
-//     callbackURL: "https://b708783f.ngrok.io/auth/google/callback",
-//     passReqToCallback: true
-//   },
-//   function(request, accessToken, refreshToken, profile, done) {
-//     User.findOrCreate({ googleId: profile.id }, function (err, user) {
-//       return done(err, user);
-//     });
-//   }
-// ));
+
+const witclient = new Wit({accessToken: 'XWGLY6YPJZWVXDFKG6OHPO7KNSZ76JNT'});
 
 // var response = function(res) { console.log(res); }
 var logError = function(err) { console.log(err); }
@@ -38,7 +27,6 @@ router.get('/', function(req, res, next) {
 });
 
 // initiates conference call with user and contact 
-// - records call, transcribes it, analyzes it, and updates model accordingly
 router.post('/call', function(req, res, next) {
 	// create caller id for user making call/verify their phone number with twilio --DO THIS LATER
 	var phoneNumber = phoneUtil.parse(req.body.from,'US');
@@ -49,7 +37,7 @@ router.post('/call', function(req, res, next) {
 	client.makeCall({
 		to: to,
 		from: '+12155154014',
-		url: 'https://1036f5d4.ngrok.io/call?to='+req.body.to,
+		url: 'https://d4ae01d8.ngrok.io/call?to='+req.body.to,
 		method: 'GET'
 	}, function(err, responseData) {
 		console.log("this is the fucking error",err)
@@ -57,10 +45,11 @@ router.post('/call', function(req, res, next) {
 	});
 })
 
+// connects twilio number and user number to the contact's number using TwiML
 router.get('/call', (req, res, next) => {
 	// data: {
 	// 	url: 'https://657a1c9b.ngrok.io/call'
-	var link="<?xml version=\'1.0\' encoding=\'UTF-8\'?><Response><Say>Connecting you to your caller</Say><Dial timeout=\'10\' record=\'true\' action=\'https://1036f5d4.ngrok.io/calls/receive\'>" + req.query.to + "</Dial></Response>";
+	var link="<?xml version=\'1.0\' encoding=\'UTF-8\'?><Response><Say>Connecting you to your caller</Say><Dial timeout=\'10\' record=\'true\' action=\'https://d4ae01d8.ngrok.io/calls/receive\'>" + req.query.to + "</Dial></Response>";
 	// console.log("LINK:", link);
 	res.set('Content-Type', 'text/xml')
 	res.send(link)
@@ -83,9 +72,12 @@ function onOpen(evt) {
    	// setInterval(noOp.bind(this), 8*1000);
 }
 
+// processes the message response of the 
 function onMessage(evt, recordingUrl) {
 	// console.log("On Message:", evt.data.);
 	evt.data = JSON.parse(evt.data);
+
+	// if the results from watson have been received, we parse the data and analyze it
 	if (evt.data["results"]) {
 
 		var chat = [];
@@ -101,14 +93,111 @@ function onMessage(evt, recordingUrl) {
 				chat.push("Person2: " + evt.data["results"][i].alternatives[0].transcript)
 			}
 		}
+
+		// saves conversation to mongoose
+		var convo = new models.Conversation({
+				  	transcription:chat  	
+				  });
+		convo.save(function(err, conversation){
+				  	if(err){
+				  		console.log("convo error",err)
+				  	}
+				  });
 		console.log("Chat", chat);
-		
-		const client = new Wit({accessToken: 'XWGLY6YPJZWVXDFKG6OHPO7KNSZ76JNT'});
-			client.message(Person1[0], {})
-			.then((data) => {
-			  console.log('Yay, got Wit.ai response: ' + JSON.stringify(data));
-			})
-			.catch(console.error);
+
+		// iterate through chat array and send every statement to Wit.ai for processing
+		for (var i = 0; i < chat.length; i++) {
+				// console.log("this is fucking chat[i]", chat[i]);
+				var chatmessage = chat[i];
+				witclient.message(chat[i], {})
+				.then((data) => {
+				  console.log('Yay, got Wit.ai response: ' + JSON.stringify(data));
+
+
+				  ///////////////////// Example Wit response \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+				  //Yay, got Wit.ai response: {"msg_id":"9e300e0a-a11c-4160-ab30-ec80c38152b2",
+				  //"_text":"Hey I'd like to schedule a meeting with you from five to seven PM on Thursday ",
+				  //"entities":{"scorpio":[{"confidence":1,"type":"value","value":"meeting at"}],
+				  //"datetime":[{"confidence":0.9759197034399201,"type":"interval","from":{"value":"2005-01-01T00:00:00.000-08:00",
+				  //"grain":"hour"},"to":{"value":"2005-01-06T20:00:00.000-08:00","grain":"hour"},"values":[]}]}}
+
+				  // iterate through keys in data.entities and look for Wit.ai triggers
+				  	// datetime
+				  
+				  	console.log('CHECK IF DATE', data.entities.datetime);
+				  	if (data.entities.datetime) {
+				  		var calendar = {description: null, startTime: null, endTime: null};
+				  		for (var j = 0; j < data.entities.datetime.length; j++) {
+						  	if (data.entities.datetime[j].type === "interval") {
+						  		calendar.startTime = data.entities.datetime[j].from.value;
+						  		var end = new Date(data.entities.datetime[j].to.value);
+						  		// still have to modify ending time
+
+						  		calendar.endTime = end;
+						  		calendar.description = chatmessage;
+						  		convo.calendar.push(calendar)
+						  		console.log("this is the calendar", calendar);
+						  	}
+				 		}
+				  	}
+
+				  	// locations
+				  	if (data.entities.location) {
+				  		data.entities.location.forEach(function(x) {
+						  convo.location.push(x.value);						  		  	
+				  		})
+				  	}
+
+				  	// learning
+				  	console.log('CHECK IF LEARN', data.entities.learn);
+				  	if (data.entities.learn) {
+				  		convo.learning.push(chatmessage);						  		 
+					}
+
+					// money amounts
+				
+					if (data.entities.amount_of_money) {
+				  		data.entities.amount_of_money.forEach(function(x) {
+			
+						  		 convo.money.push(x.value);	 
+						  	
+				  		})
+				  	}
+
+				  	// add twitter engagements or sentiments
+
+				  	// save to model when done
+				  	convo.save(function(err, conversation) {
+						  			if (err) console.log("individual error", err);
+						  			// console.log("saved convo:", conversation)
+						  		})
+
+				  	//////////////////////// to do: seed database, add twitter engagements, add hour/minute to end time, test
+
+				//   var calendar = {description: null, startTime: null, endTime: null, location: null};
+				 
+				//   for (var j = 0; j < data.entities.datetime.length; j++) {
+				//   	if (data.entities.datetime[j].type === "interval" && data.entities.datetime.confidence > 0.95) {
+				//   		calendar.startTime = data.entities.datetime[j].from.value;
+				//   		var end = new Date(data.entities.datetime[j].to.value);
+
+
+				//   		calendar.endTime = end;
+
+				//   		// if (data.entities.location) {
+				//   		// 	calendar.location = data.entities.location;
+				//   		// }
+				//   		calendar.description = chatmessage;
+				//   		convo.calendar.push(calendar)
+				//   		convo.save(function(err, conversation) {
+				//   			if (err) console.log("individual error", err);
+				//   			console.log("saved convo:", conversation)
+				//   		})
+				//   	}
+				//   }
+				})
+				.catch(console.error)
+		};
 		indico.analyzeText(Person1, {apis: ['sentiment_hq', 'places', 'people', 'emotion', 'twitterEngagement']})
 			.then((res) => {
 				var sumSent = 0;
@@ -134,68 +223,42 @@ function onMessage(evt, recordingUrl) {
 						people += res.people[i][j].text + ", ";
 					}
 				}
-				// var emotion = [];
-				// var sumAnger = 0;
-				// var sumJoy = 0;
-				// var sumSadness = 0;
-				// var sumFear = 0;
-				// var sumSurprise = 0;
-				// for (var i in res.emotion) {
-				// 	switch (res.emotion[i]) {
-				// 		case "anger":
-				// 			sumAnger += res.emotion[i].anger;
-				// 		case "joy":
-				// 			sumJoy += res.emotion[i].joy;
-				// 		case "fear":
-				// 			sumFear += res.emotion[i].fear;
-				// 		case "sadness":
-				// 			sumSadness += res.emotion[i].sadness;
-				// 		case "surprise":
-				// 			sumSurprise += res.emotion[i].surprise;
-				// 	}
-				// }
-				// emotion.push(sumAnger/res.emotion.length);
-				// emotion.push(sumJoy/res.emotion.length);
-				// emotion.push(sumFear/res.emotion.length);
-				// emotion.push(sumSadness/res.emotion.length);
-				// emotion.push(sumSurprise/res.emotion.length);
+				
 
 				console.log("Person1 mentioned these places: ", places);
 				console.log("Person1 mentioned these people: ", people);
 				console.log("Person1's average Twitter Engagement was ", avgTwit);
 				// console.log("Person1's emotions for each statement: ", res.emotion)
 				console.log("Person1's average sentiment was ", avgSent)})
-				// console.log("Anger: ", emotion[0]);
-				// console.log("Joy: ", emotion[1]);
-				// console.log("Fear: ", emotion[2]);
-				// console.log("Sadness: ", emotion[3]);
-				// console.log("Surprise: ", emotion[4])
+				
 			.catch(logError);
-			indico.analyzeText(Person2, {apis: ['sentiment_hq', 'places', 'people', 'emotion', 'twitterEngagement']})
-			.then((res) => {
-				var sumSent = 0;
-				var sumTwit = 0;
-				var avgSent = 0;
-				var avgTwit = 0;
-				for (var i=0; i<res.sentiment_hq.length; i++) {
-					sumSent += res.sentiment_hq[i];
-					sumTwit += res.twitterEngagement[i];
-				}
-				avgSent = sumSent/res.sentiment_hq.length;
-				avgTwit = sumTwit/res.twitterEngagement.length;
+			// indico.analyzeText(Person2, {apis: ['sentiment_hq', 'places', 'people', 'emotion', 'twitterEngagement']})
+			// .then((res) => {
+			// 	var sumSent = 0;
+			// 	var sumTwit = 0;
+			// 	var avgSent = 0;
+			// 	var avgTwit = 0;
+			// 	for (var i=0; i<res.sentiment_hq.length; i++) {
+			// 		sumSent += res.sentiment_hq[i];
+			// 		sumTwit += res.twitterEngagement[i];
+			// 	}
+			// 	avgSent = sumSent/res.sentiment_hq.length;
+			// 	avgTwit = sumTwit/res.twitterEngagement.length;
 
-				var places = '';
-				for (var i=0; i<res.places.length; i++) {
-					for (var j in res.places[i]) {
-						places += res.places[i][j].text + ", ";
-					}
-				}
-				var people = '';
-				for (var i=0; i<res.people.length; i++) {
-					for (var j in res.people[i]) {
-						people += res.people[i][j].text + ", ";
-					}
-				}
+			// 	var places = '';
+			// 	for (var i=0; i<res.places.length; i++) {
+			// 		for (var j in res.places[i]) {
+			// 			places += res.places[i][j].text + ", ";
+			// 		}
+			// 	}
+			// 	var people = '';
+			// 	for (var i=0; i<res.people.length; i++) {
+			// 		for (var j in res.people[i]) {
+			// 			people += res.people[i][j].text + ", ";
+			// 		}
+			// 	}
+
+				// attempt at parsing emotions
 				// var emotion = [];
 				// var sumAnger = 0;
 				// var sumJoy = 0;
@@ -222,16 +285,16 @@ function onMessage(evt, recordingUrl) {
 				// emotion.push(sumSadness/res.emotion.length);
 				// emotion.push(sumSurprise/res.emotion.length);
 
-				console.log("Person2 mentioned these places: ", places);
-				console.log("Person2 mentioned these people: ", people);
-				console.log("Person2's average Twitter Engagement was ", avgTwit);
-				console.log("Person2's average sentiment was ", avgSent)})
+				// console.log("Person2 mentioned these places: ", places);
+				// console.log("Person2 mentioned these people: ", people);
+				// console.log("Person2's average Twitter Engagement was ", avgTwit);
+				// console.log("Person2's average sentiment was ", avgSent)})
 				// console.log("Anger: ", emotion[0]);
 				// console.log("Joy: ", emotion[1]);
 				// console.log("Fear: ", emotion[2]);
 				// console.log("Sadness: ", emotion[3]);
 				// console.log("Surprise: ", emotion[4])
-			.catch(logError);
+			// .catch(logError);
 		// indico.analyzeText(Person2, {apis: ['sentiment_hq', 'places', 'people', 'emotion', 'twitterEngagement']}).then((res) => {console.log("Person2: ", res)}).catch(logError);
 		//indico.places(Person1)
 		this.close()
@@ -251,6 +314,7 @@ function onClose(evt) {
 	console.log("[Closing socket. Goodbye!]");
 }
 
+// obtains a new watson token, since it requires a new one with each api call
 var getNewWatsonToken = function() {
 	return new Promise(function(resolve, reject) {
 		request.get("https://stream.watsonplatform.net/authorization/api/v1/token?url=https://stream.watsonplatform.net/speech-to-text/api", {
@@ -265,6 +329,7 @@ var getNewWatsonToken = function() {
 	});
 }
 
+// creates a new web socket; all functions within it are called by the socket and not us 
 var createNewSocket = function(token, recordingUrl) {
 	return new Promise(function(resolve, reject) {
 		try {
@@ -290,10 +355,8 @@ var waitForSocketConnect = function(socket) {
 	});
 }
 
+//
 router.post('/calls/receive', (req, res, next) => {
-  // when a call is sent from a user, should send another request to start a conference call with the two people that should be talking
-  //for now, just respond to make this work
-
 
   getNewWatsonToken()
 	.then((token) => createNewSocket(token, req.body.RecordingUrl))

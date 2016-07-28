@@ -20,32 +20,38 @@ var userSchema = mongoose.Schema({
 });
 
 var conversationSchema = mongoose.Schema({
-	contact: {
-		type: String
-	},
-	date: {
-      type: String
-    },
-    transcription: {
-      type: String
-    },
-    numbers: {
-      type: Array
-    },
-    locations: {
-      type: Array
-    },
-    triggerSurround: {
-      type: Array
-    },
-    user: {
-    	type: mongoose.Schema.Types.ObjectId,
-	  	ref: 'User'
-    }
+  contact: {
+    type: String
+  },
+  date: {
+    type: String
+  },
+  transcription: {
+    type: Array
+  },
+  calendar:{
+    type: Array
+  },
+  locations: {
+    type: Array
+  },
+  learning: {
+    type: Array
+  },
+  money: {
+    type: Array
+  },
+  twitter: {
+    type: Array
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }
 })
 
 userSchema.methods.validPassword = function(pw) {
-	return bcrypt.compareSync(pw, this.password);
+  return bcrypt.compareSync(pw, this.password);
 }
 
 userSchema.plugin(findOrCreate);

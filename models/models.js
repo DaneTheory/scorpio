@@ -43,7 +43,7 @@ var conversationSchema = mongoose.Schema({
   },
   twitter: {
     type: Array
-  }
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'

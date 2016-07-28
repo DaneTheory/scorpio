@@ -32,15 +32,18 @@ var conversationSchema = mongoose.Schema({
   calendar:{
     type: Array
   },
-  numbers: {
-    type: Array
-  },
   locations: {
     type: Array
   },
-  triggerSurround: {
+  learning: {
     type: Array
   },
+  money: {
+    type: Array
+  },
+  twitter: {
+    type: Array
+  }
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'

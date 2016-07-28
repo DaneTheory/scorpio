@@ -101,7 +101,7 @@ function onMessage(evt, recordingUrl) {
 
 		// iterate through chat array and send every statement to Wit.ai for processing
 		for (var i = 0; i < chat.length; i++) {
-				console.log("this is fucking chat[i]", chat[i]);
+				// console.log("this is fucking chat[i]", chat[i]);
 				var chatmessage = chat[i];
 				witclient.message(chat[i], {})
 				.then((data) => {
@@ -116,13 +116,13 @@ function onMessage(evt, recordingUrl) {
 				  //"grain":"hour"},"to":{"value":"2005-01-06T20:00:00.000-08:00","grain":"hour"},"values":[]}]}}
 
 				  // iterate through keys in data.entities and look for Wit.ai triggers
-				  for (var k in data.entities) {
-
 				  	// datetime
-				  	if (data.entities.k === 'datetime') {
-				  		var calendar = {description: null, startTime: null, endTime: null, location: null};
+				  
+				  	console.log('CHECK IF DATE', data.entities.datetime);
+				  	if (data.entities.datetime) {
+				  		var calendar = {description: null, startTime: null, endTime: null};
 				  		for (var j = 0; j < data.entities.datetime.length; j++) {
-						  	if (data.entities.datetime[j].type === "interval" && data.entities.datetime.confidence > 0.95) {
+						  	if (data.entities.datetime[j].type === "interval") {
 						  		calendar.startTime = data.entities.datetime[j].from.value;
 						  		var end = new Date(data.entities.datetime[j].to.value);
 						  		// still have to modify ending time
@@ -130,31 +130,31 @@ function onMessage(evt, recordingUrl) {
 						  		calendar.endTime = end;
 						  		calendar.description = chatmessage;
 						  		convo.calendar.push(calendar)
-						  		
+						  		console.log("this is the calendar", calendar);
 						  	}
 				 		}
 				  	}
 
 				  	// locations
-				  	if (data.entities.k === 'locations') {
+				  	if (data.entities.location) {
 				  		data.entities.location.forEach(function(x) {
-						  	if (data.entities.location[x].confidence > 0.95) {
-						  		 convo.locations.push(data.entities.location[x]);						  		 
-						  	}
+						  convo.location.push(x.value);						  		  	
 				  		})
 				  	}
 
 				  	// learning
-				  	if (data.entities.k === 'learn') {
+				  	console.log('CHECK IF LEARN', data.entities.learn);
+				  	if (data.entities.learn) {
 				  		convo.learning.push(chatmessage);						  		 
 					}
 
 					// money amounts
-					if (data.entities.k === 'amount_of_money') {
+				
+					if (data.entities.amount_of_money) {
 				  		data.entities.amount_of_money.forEach(function(x) {
-						  	if (data.entities.amount_of_money[x].confidence > 0.95) {
-						  		 convo.money.push(data.entities.amount_of_money[x]);	 
-						  	}
+			
+						  		 convo.money.push(x.value);	 
+						  	
 				  		})
 				  	}
 
@@ -163,34 +163,32 @@ function onMessage(evt, recordingUrl) {
 				  	// save to model when done
 				  	convo.save(function(err, conversation) {
 						  			if (err) console.log("individual error", err);
-						  			console.log("saved convo:", conversation)
+						  			// console.log("saved convo:", conversation)
 						  		})
 
 				  	//////////////////////// to do: seed database, add twitter engagements, add hour/minute to end time, test
 
-				  var calendar = {description: null, startTime: null, endTime: null, location: null};
+				//   var calendar = {description: null, startTime: null, endTime: null, location: null};
 				 
-				  for (var j = 0; j < data.entities.datetime.length; j++) {
-				  	if (data.entities.datetime[j].type === "interval" && data.entities.datetime.confidence > 0.95) {
-				  		calendar.startTime = data.entities.datetime[j].from.value;
-				  		var end = new Date(data.entities.datetime[j].to.value);
+				//   for (var j = 0; j < data.entities.datetime.length; j++) {
+				//   	if (data.entities.datetime[j].type === "interval" && data.entities.datetime.confidence > 0.95) {
+				//   		calendar.startTime = data.entities.datetime[j].from.value;
+				//   		var end = new Date(data.entities.datetime[j].to.value);
 
 
-				  		calendar.endTime = end;
+				//   		calendar.endTime = end;
 
-				  		// if (data.entities.location) {
-				  		// 	calendar.location = data.entities.location;
-				  		// }
-				  		calendar.description = chatmessage;
-				  		convo.calendar.push(calendar)
-				  		convo.save(function(err, conversation) {
-				  			if (err) console.log("individual error", err);
-				  			console.log("saved convo:", conversation)
-				  		})
-				  	}
-				  }
-				}
-				 
+				//   		// if (data.entities.location) {
+				//   		// 	calendar.location = data.entities.location;
+				//   		// }
+				//   		calendar.description = chatmessage;
+				//   		convo.calendar.push(calendar)
+				//   		convo.save(function(err, conversation) {
+				//   			if (err) console.log("individual error", err);
+				//   			console.log("saved convo:", conversation)
+				//   		})
+				//   	}
+				//   }
 				})
 				.catch(console.error)
 		};
@@ -228,31 +226,31 @@ function onMessage(evt, recordingUrl) {
 				console.log("Person1's average sentiment was ", avgSent)})
 				
 			.catch(logError);
-			indico.analyzeText(Person2, {apis: ['sentiment_hq', 'places', 'people', 'emotion', 'twitterEngagement']})
-			.then((res) => {
-				var sumSent = 0;
-				var sumTwit = 0;
-				var avgSent = 0;
-				var avgTwit = 0;
-				for (var i=0; i<res.sentiment_hq.length; i++) {
-					sumSent += res.sentiment_hq[i];
-					sumTwit += res.twitterEngagement[i];
-				}
-				avgSent = sumSent/res.sentiment_hq.length;
-				avgTwit = sumTwit/res.twitterEngagement.length;
+			// indico.analyzeText(Person2, {apis: ['sentiment_hq', 'places', 'people', 'emotion', 'twitterEngagement']})
+			// .then((res) => {
+			// 	var sumSent = 0;
+			// 	var sumTwit = 0;
+			// 	var avgSent = 0;
+			// 	var avgTwit = 0;
+			// 	for (var i=0; i<res.sentiment_hq.length; i++) {
+			// 		sumSent += res.sentiment_hq[i];
+			// 		sumTwit += res.twitterEngagement[i];
+			// 	}
+			// 	avgSent = sumSent/res.sentiment_hq.length;
+			// 	avgTwit = sumTwit/res.twitterEngagement.length;
 
-				var places = '';
-				for (var i=0; i<res.places.length; i++) {
-					for (var j in res.places[i]) {
-						places += res.places[i][j].text + ", ";
-					}
-				}
-				var people = '';
-				for (var i=0; i<res.people.length; i++) {
-					for (var j in res.people[i]) {
-						people += res.people[i][j].text + ", ";
-					}
-				}
+			// 	var places = '';
+			// 	for (var i=0; i<res.places.length; i++) {
+			// 		for (var j in res.places[i]) {
+			// 			places += res.places[i][j].text + ", ";
+			// 		}
+			// 	}
+			// 	var people = '';
+			// 	for (var i=0; i<res.people.length; i++) {
+			// 		for (var j in res.people[i]) {
+			// 			people += res.people[i][j].text + ", ";
+			// 		}
+			// 	}
 
 				// attempt at parsing emotions
 				// var emotion = [];
@@ -281,16 +279,16 @@ function onMessage(evt, recordingUrl) {
 				// emotion.push(sumSadness/res.emotion.length);
 				// emotion.push(sumSurprise/res.emotion.length);
 
-				console.log("Person2 mentioned these places: ", places);
-				console.log("Person2 mentioned these people: ", people);
-				console.log("Person2's average Twitter Engagement was ", avgTwit);
-				console.log("Person2's average sentiment was ", avgSent)})
+				// console.log("Person2 mentioned these places: ", places);
+				// console.log("Person2 mentioned these people: ", people);
+				// console.log("Person2's average Twitter Engagement was ", avgTwit);
+				// console.log("Person2's average sentiment was ", avgSent)})
 				// console.log("Anger: ", emotion[0]);
 				// console.log("Joy: ", emotion[1]);
 				// console.log("Fear: ", emotion[2]);
 				// console.log("Sadness: ", emotion[3]);
 				// console.log("Surprise: ", emotion[4])
-			.catch(logError);
+			// .catch(logError);
 		// indico.analyzeText(Person2, {apis: ['sentiment_hq', 'places', 'people', 'emotion', 'twitterEngagement']}).then((res) => {console.log("Person2: ", res)}).catch(logError);
 		//indico.places(Person1)
 		this.close()

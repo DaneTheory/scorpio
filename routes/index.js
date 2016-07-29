@@ -135,13 +135,15 @@ function onMessage(evt, recordingUrl) {
 				  		for (var j = 0; j < data.entities.datetime.length; j++) {
 						  	if (data.entities.datetime[j].type === "interval") {
 						  		calendar.startTime = data.entities.datetime[j].from.value;
-						  		var end = new Date(data.entities.datetime[j].to.value);
+						  		var end = data.entities.datetime[j].to.value;
 						  		// still have to modify ending time
-
-						  		calendar.endTime = end;
+						  		var a = new Date(end);
+						  		console.log(a)
+						  		a.setHours(a.getHours() - 1);
+						  		
+						  		calendar.endTime = a.toUTCString();
 						  		calendar.description = chatmessage;
 						  		convo.calendar.push(calendar)
-						  		console.log("this is the calendar", calendar);
 						  	}
 				 		}
 				  	}

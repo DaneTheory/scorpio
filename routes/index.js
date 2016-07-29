@@ -4,21 +4,18 @@ var client = require('twilio')('AC0267f6ffaee6267f387f6681654ba52b', 'b7fd16fb34
 var request = require('request');
 var passport = require('passport');
 var findOrCreate = require('mongoose-findorcreate');
-// var WebSocket = require('websocket').w3cwebsocket;
 var websocket = require('websocket-stream');
 var wsURI = "wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize?watson-token=";
 var indico = require('indico.io');
 indico.apiKey =  '98ec712b78bba76fbc655865c9e74cbe';
 var Wit = require('node-wit').Wit;
-var phone = require('node-phonenumber')
+const witclient = new Wit({accessToken: 'XWGLY6YPJZWVXDFKG6OHPO7KNSZ76JNT'});
+var phone = require('node-phonenumber');
 var phoneUtil = phone.PhoneNumberUtil.getInstance();
 var models = require('../models/models');
 
-const URI = "http://scorpio-backend.herokuapp.com"
-
-
-
-const witclient = new Wit({accessToken: 'XWGLY6YPJZWVXDFKG6OHPO7KNSZ76JNT'});
+const URI = "http://scorpio-backend.herokuapp.com";
+// const SERVER_URI = "https://7729e36e.ngrok.io";
 
 // var response = function(res) { console.log(res); }
 var logError = function(err) { console.log(err); }
@@ -34,25 +31,31 @@ router.post('/call', function(req, res, next) {
 	var phoneNumber = phoneUtil.parse(req.body.from,'US');
 	var toNumber = phoneUtil.format(phoneNumber, phone.PhoneNumberFormat.INTERNATIONAL);
 	var to = toNumber.replace(/[ ]/g, '').replace(/[-]/g, '');
+	// console.log("to number:" + to)
 
 	// make a call request to Twilio, using the from number as the number verified in the previous route
 	client.makeCall({
 		to: to,
 		from: '+12155154014',
-		url: URI + '/call?to='+req.body.to,
+		url: SERVER_URI + '/call?to=' + req.body.to,
 		method: 'GET'
 	}, function(err, responseData) {
-		console.log("this is the fucking error",err)
-		console.log("RESPONSE DATA:", responseData);
+		if (!err) {
+			// console.log("this is the fucking error",err)
+			return res.sendStatus(200)
+		}
+		return res.sendStatus(400)
 	});
+	// res.sendStatus(200)
 })
 
 // connects twilio number and user number to the contact's number using TwiML
 router.get('/call', (req, res, next) => {
-	// data: {
-	// 	url: 'https://657a1c9b.ngrok.io/call'
-	var link="<?xml version=\'1.0\' encoding=\'UTF-8\'?><Response><Say>Connecting you to your caller</Say><Dial timeout=\'10\' record=\'true\' action=\"" + URI +"'/calls/receive\'>" + req.query.to + "</Dial></Response>";
-	// console.log("LINK:", link);
+	var link="<?xml version='1.0' encoding='UTF-8'?>\
+			<Response>\
+				<Say>Connecting you to your caller</Say><Dial timeout='10' record='true' action='" + SERVER_URI +"/calls/receive'>" + req.query.to + "</Dial>\
+			</Response>";
+	console.log("TwiML", link)
 	res.set('Content-Type', 'text/xml')
 	res.send(link)
 })

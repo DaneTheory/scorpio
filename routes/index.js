@@ -14,7 +14,7 @@ var phone = require('node-phonenumber');
 var phoneUtil = phone.PhoneNumberUtil.getInstance();
 var models = require('../models/models');
 
-const URI = "http://scorpio-backend.herokuapp.com";
+const SERVER_URI = "http://scorpio-backend.herokuapp.com";
 // const SERVER_URI = "https://7729e36e.ngrok.io";
 
 // var response = function(res) { console.log(res); }

@@ -37,7 +37,7 @@ router.post('/call', function(req, res, next) {
 	client.makeCall({
 		to: to,
 		from: '+12155154014',
-		url: 'https://d4ae01d8.ngrok.io/call?to='+req.body.to,
+		url: 'https://6416ff7a.ngrok.io/call?to='+req.body.to,
 		method: 'GET'
 	}, function(err, responseData) {
 		console.log("this is the fucking error",err)
@@ -49,7 +49,7 @@ router.post('/call', function(req, res, next) {
 router.get('/call', (req, res, next) => {
 	// data: {
 	// 	url: 'https://657a1c9b.ngrok.io/call'
-	var link="<?xml version=\'1.0\' encoding=\'UTF-8\'?><Response><Say>Connecting you to your caller</Say><Dial timeout=\'10\' record=\'true\' action=\'https://d4ae01d8.ngrok.io/calls/receive\'>" + req.query.to + "</Dial></Response>";
+	var link="<?xml version=\'1.0\' encoding=\'UTF-8\'?><Response><Say>Connecting you to your caller</Say><Dial timeout=\'10\' record=\'true\' action=\'https://6416ff7a.ngrok.io/calls/receive\'>" + req.query.to + "</Dial></Response>";
 	// console.log("LINK:", link);
 	res.set('Content-Type', 'text/xml')
 	res.send(link)

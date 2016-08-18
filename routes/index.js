@@ -33,15 +33,13 @@ router.post('/call', function(req, res, next) {
 	var to = toNumber.replace(/[ ]/g, '').replace(/[-]/g, '');
 	// console.log("to number:" + to)
 
+
 	// make a call request to Twilio, using the from number as the number verified in the previous route
 	client.makeCall({
 		to: to,
 		from: '+12155154014',
-<<<<<<< Updated upstream
 		url: SERVER_URI + '/call?to=' + req.body.to,
-=======
 		url: 'https://scorpio-backend.herokuapp.com/'+req.body.to,
->>>>>>> Stashed changes
 		method: 'GET'
 	}, function(err, responseData) {
 		if (!err) {
@@ -105,8 +103,10 @@ function onMessage(evt, recordingUrl) {
 
 		// saves conversation to mongoose
 		var convo = new models.Conversation({
-				  	transcription:chat  	
-				  });
+			name: 'hehe',
+			date: new Date(),
+			transcription:chat  	
+		});
 		convo.save(function(err, conversation){
 				  	if(err){
 				  		console.log("convo error",err)
@@ -169,9 +169,7 @@ function onMessage(evt, recordingUrl) {
 				
 					if (data.entities.amount_of_money) {
 				  		data.entities.amount_of_money.forEach(function(x) {
-			
 						  		 convo.money.push(x.value);	 
-						  	
 				  		})
 				  	}
 
@@ -234,8 +232,6 @@ function onMessage(evt, recordingUrl) {
 						people += res.people[i][j].text + ", ";
 					}
 				}
-				
-
 				console.log("Person1 mentioned these places: ", places);
 				console.log("Person1 mentioned these people: ", people);
 				console.log("Person1's average Twitter Engagement was ", avgTwit);

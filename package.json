@@ -18,6 +18,7 @@
     "indico.io": "^0.10.0",
     "jade": "~1.11.0",
     "mongoose": "^4.5.7",
+    "mongoose-findorcreate": "^0.1.2",
     "morgan": "~1.7.0",
     "node-phonenumber": "^0.2.3",
     "node-wit": "^4.0.0",

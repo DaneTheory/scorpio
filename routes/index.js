@@ -37,7 +37,11 @@ router.post('/call', function(req, res, next) {
 	client.makeCall({
 		to: to,
 		from: '+12155154014',
+<<<<<<< Updated upstream
 		url: SERVER_URI + '/call?to=' + req.body.to,
+=======
+		url: 'https://scorpio-backend.herokuapp.com/'+req.body.to,
+>>>>>>> Stashed changes
 		method: 'GET'
 	}, function(err, responseData) {
 		if (!err) {
